@@ -37,7 +37,7 @@ my $configFile	= "/etc/ovhsms.conf";
 my $soap = SOAP::Lite
  -> uri('https://soapi.ovh.com/manager')
  -> proxy('https://www.ovh.com:1664');
-our($email, $config, $account, $user, $password, $from, $to, $message, $unblock, $lockChannel, $send);
+our($email, $config, $account, $user, $password, $from, $to, $message, $unlock, $lockChannel, $send);
 
 # Check if temp folder for lockfiles exists
 unless(-e $tempDir or mkdir $tempDir) {
@@ -91,10 +91,17 @@ if($send) {
 	}
 }
 # Unlock channel? 
-elsif($unblock) {
+elsif($unlock) {
 	# Only alphanum allowed
-	if($unblock =~ m/^[[:alnum:]]+$/) {
-		`rm -f $tempDir"LOCK_"$unblock`;
+	if($unlock =~ m/^[[:alnum:]]+$/) {
+		$unlock = $tempDir."LOCK_".$unlock;
+		if($message) {
+			# Send message if a LOCK file is present
+			if(-e $unlock) {
+				sendSMS();
+			}
+		}
+		`rm -f $unlock`;
 	} else {
 		print "Channel has to be alphanumeric\n";
 		exit 1;
@@ -150,7 +157,7 @@ sub loadConfig {
 
 	$send = ($opt_s) ? $opt_s : 0;
 	$lockChannel = ($opt_l) ? $opt_l : 0;
-	$unblock = ($opt_U) ? $opt_U : 0;
+	$unlock = ($opt_U) ? $opt_U : 0;
 	$message = ($opt_m) ? $opt_m : 0;
 	$email = ($opt_d) ? $opt_d : 0;
 
@@ -169,26 +176,27 @@ To:			$to
 From:		$from
 Send:		$send
 LockChannel:	$lockChannel
+UnlockChannel:	$unlock
 ==================================
 $date
 EndEmail
 	my $msg = MIME::Lite->new(
 		From 	=> "OVHSMS",
-		To		=> "$email",
+		To		=> $email,
 		Subject	=> "OVHSMS - Debug",
-		Data	=> "$emailText"
+		Data	=> $emailText
 	);
 	$msg->send;
 }
 
 sub printHelp {
 	print <<EndHelp;
-OVHSMS $version | (c) 2013 by Christoph Gross (gross@blubyte.de)
+OVHSMS $version | (c) 2013 by Christoph Gross (gross\@blubyte.de)
 Send SMS using OVH SOAP API
 
 Commands:
 	-s 		- Sends a SMS
-	-U channel	- Unlocks a channel
+	-U channel	- Unlocks a channel, use -m to send SMS if successful
 	-h 		- This Help
 
 Options:
