@@ -1,22 +1,24 @@
 #!/usr/bin/perl
+# 
+# OVHSMS
 #
-#	This file is part of OVHSMS.
+# (c) 2013 by Christoph Gross (gross@bluybte.de)
 #
-#	OVHSMS is free software: you can redistribute it and/or modify
-#	it under the terms of the GNU General Public License as published by
-#	the Free Software Foundation, either version 3 of the License, or
-#	(at your option) any later version.
+# OVHSMS is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#	OVHSMS is distributed in the hope that it will be useful,
-#	but WITHOUT ANY WARRANTY; without even the implied warranty of
-#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#	GNU General Public License for more details.
+# OVHSMS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#	You should have received a copy of the GNU General Public License
-#	along with OVHSMS.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License
+# along with OVHSMS.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
-# 	Send SMS using OVH SOAP API
+# Send SMS using OVH SOAP API
 
 use 5.010;
 use strict;
@@ -29,6 +31,7 @@ use Config::IniFiles;
 use MIME::Lite;
 use SOAP::Lite on_fault => sub { my($soap, $res) = @_; die ref $res ? $res->faultstring : $soap->transport->status; };
 
+my $version		= "0.3.0";
 my $tempDir		= "/tmp/ovhsms/";
 my $configFile	= "/etc/ovhsms.conf";
 my $soap = SOAP::Lite
@@ -180,7 +183,7 @@ EndEmail
 
 sub printHelp {
 	print <<EndHelp;
-
+OVHSMS $version | (c) 2013 by Christoph Gross (gross@blubyte.de)
 Send SMS using OVH SOAP API
 
 Commands:
